@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// Section model (hero, solution, feature, credibility, vision, mission, history)
+model Section {
+  id          Int      @id @default(autoincrement())
+  sectionKey  String   @unique @map("section_key") @db.VarChar(50)
+  image       String?  @db.VarChar(255)
+  title       String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("section")
+}
+
+// Hero
+model Hero {
+  id           Int      @id @default(autoincrement())
+  imageDesktop String   @db.VarChar(255)
+  imageMobile  String   @db.VarChar(255)
+  title        String   @db.VarChar(255)
+  description  String   @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("heroes")
+}
+
+// Solutions model
+model Solution {
+  id          Int      @id @default(autoincrement())
+  image       String   @db.VarChar(255)
+  title       String   @db.VarChar(255)
+  description String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("solutions")
+}
+
+// Features model
+model Feature {
+  id          Int      @id @default(autoincrement())
+  image       String   @db.VarChar(255)
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("features")
+}
+
+// Credibilities model
+model Credibility {
+  id          Int      @id @default(autoincrement())
+  total       Int
+  description String   @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("credibilities")
+}
+
+// Testimonials model
+model Testimony {
+  id          Int      @id @default(autoincrement())
+  logo        String?  @db.VarChar(255)
+  institution String?  @db.VarChar(255)
+  name        String   @db.VarChar(255)
+  description String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("testimonies")
+}
+
+// Social
+model Social {
+  id        Int      @id @default(autoincrement())
+  type      String   @db.VarChar(255)
+  value     String   @db.VarChar(50)
+  link      String?  @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("socials")
+}
+
+// Members model (Team members)
+model Member {
+  id        Int      @id @default(autoincrement())
+  image     String?  @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  role      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("members")
+}
+
+// Modules model
+model Module {
+  id             Int             @id @default(autoincrement())
+  image          String?         @db.VarChar(255)
+  title          String          @db.VarChar(255)
+  description    String?         @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  moduleFeatures ModuleFeature[]
+
+  @@map("modules")
+}
+
+// Modules model
+model ModuleFeature {
+  id          Int      @id @default(autoincrement())
+  image       String   @db.VarChar(255)
+  description String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  moduleId    Int
+  module      Module   @relation(fields: [moduleId], references: [id])
+
+  @@map("module_features")
+}
+
+// Clients model
+model Client {
+  id                 Int      @id @default(autoincrement())
+  logo               String?  @db.VarChar(255)
+  name               String   @db.VarChar(255)
+  projectDescription String?  @map("project_description") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+// Information model
+model Information {
+  id           Int      @id @default(autoincrement())
+  sectionKey   String   @unique @map("section_key") @db.VarChar(50)
+  vision       String   @db.Text
+  mission      String   @db.Text
+  history      String   @db.Text
+  favicon      String?  @db.VarChar(255)
+  logo         String?  @db.VarChar(255)
+  name         String?  @db.VarChar(255)
+  description  String?  @db.Text
+  address      String?  @db.Text
+  email        String?  @db.VarChar(255)
+  phone_number String?  @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("information")
+}
