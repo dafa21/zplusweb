@@ -4,14 +4,12 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import useResponsive from "@/store/use-responsive";
 import { useQuery } from "@tanstack/react-query";
-import { LoaderCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function Heroes() {
@@ -45,7 +43,7 @@ export default function Heroes() {
   if (isLoading) {
     return (
       <>
-        <div className="w-full min-h-[250px] lg:h-screen"></div>
+        <div className="w-full h-[58vh] min-h-[480px] lg:h-screen"></div>
         <div className="fixed inset-0 z-50 bg-white flex justify-center items-center">
           <LoaderCircle className="animate-spin scale-200 text-primary-cyan" />
         </div>
@@ -53,8 +51,12 @@ export default function Heroes() {
     );
   }
 
+  const currentIndex = currentHero?.id
+    ? heroes.findIndex((h) => h.id === currentHero.id)
+    : 0;
+
   return (
-    <div className="w-full relative overflow-hidden">
+    <div className="w-full relative overflow-hidden bg-slate-950">
       <Carousel
         setApi={setApiCarosel}
         opts={{
@@ -92,62 +94,97 @@ export default function Heroes() {
           ))}
         </div>
 
-        {/* mobile title */}
-        {currentHero?.title?.trim() ? (
-          <div className="absolute left-4 bottom-3 z-20 lg:hidden pointer-events-none">
-            <h4 className="text-white text-xs sm:text-sm font-semibold truncate max-w-[45vw] drop-shadow-md">
-              {currentHero.title}
-            </h4>
-          </div>
-        ) : null}
-
-        {/* mobile dots indicator */}
+        {/* mobile navigation controls (frosted glass bar) */}
         {heroes.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 lg:hidden">
-            {heroes.map((hero, index) => (
+          <div className="absolute bottom-4 inset-x-0 z-20 flex items-center justify-between px-4 sm:px-6 lg:hidden pointer-events-none">
+            {/* Title / Counter on mobile */}
+            <div className="pointer-events-auto max-w-[42vw]">
+              {currentHero?.title?.trim() ? (
+                <h4 className="text-white text-xs font-semibold truncate drop-shadow-md">
+                  {currentHero.title}
+                </h4>
+              ) : (
+                <span className="text-white/80 text-[11px] font-semibold tracking-wider px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 shadow">
+                  {(currentIndex >= 0 ? currentIndex : 0) + 1} / {heroes.length}
+                </span>
+              )}
+            </div>
+
+            {/* Mobile Dots Indicator */}
+            <div className="pointer-events-auto flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg">
+              {heroes.map((hero, index) => (
+                <button
+                  key={hero.id}
+                  onClick={() => apiCarosel?.scrollTo(index)}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
+                    currentHero?.id === hero.id
+                      ? "w-6 bg-primary-cyan"
+                      : "w-1.5 bg-white/60 hover:bg-white"
+                  )}
+                  aria-label={`Slide ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* Mobile Prev / Next Buttons */}
+            <div className="pointer-events-auto flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg">
               <button
-                key={hero.id}
-                onClick={() => apiCarosel?.scrollTo(index)}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
-                  currentHero?.id === hero.id
-                    ? "w-6 bg-primary-cyan"
-                    : "w-1.5 bg-white/60 hover:bg-white"
-                )}
-                aria-label={`Slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* mobile prev/next buttons */}
-        {heroes.length > 1 && (
-          <div className="absolute right-12 bottom-4 z-20 lg:hidden scale-75">
-            <CarouselPrevious />
-            <CarouselNext />
+                onClick={() => apiCarosel?.scrollPrev()}
+                className="p-1.5 rounded-full text-white/90 hover:text-white hover:bg-white/20 active:scale-90 transition cursor-pointer"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => apiCarosel?.scrollNext()}
+                className="p-1.5 rounded-full text-white/90 hover:text-white hover:bg-white/20 active:scale-90 transition cursor-pointer"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 
         <CarouselContent>
           {heroes.map((hero) => (
             <CarouselItem key={hero.id} className="pl-0">
-              <div className="relative w-full lg:h-screen flex items-center justify-center">
-                <picture className="w-full h-full block">
-                  <source
-                    media="(max-width: 1023px)"
-                    srcSet={hero.imageMobile || hero.imageDesktop}
-                  />
-                  <source
-                    media="(min-width: 1024px)"
-                    srcSet={hero.imageDesktop || hero.imageMobile}
-                  />
+              <div className="relative w-full h-[58vh] min-h-[480px] max-h-[580px] lg:h-screen lg:max-h-none flex items-center justify-center overflow-hidden">
+                {/* Ambient glow background for mobile */}
+                <div className="absolute inset-0 z-0 overflow-hidden lg:hidden pointer-events-none">
                   <img
                     src={isMobile ? hero.imageMobile : hero.imageDesktop}
-                    alt={hero.title?.trim() || "Hero"}
-                    className="w-full h-auto object-contain block lg:absolute lg:inset-0 lg:z-10 lg:w-full lg:h-full lg:object-cover"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-full h-full object-cover blur-3xl opacity-40 scale-125 saturate-150 brightness-95"
                   />
-                </picture>
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/45" />
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-background to-transparent" />
+                </div>
 
+                {/* Foreground Banner Graphic */}
+                <div className="relative z-10 w-full h-full flex flex-col justify-center items-center px-3 sm:px-6 pt-14 pb-14 lg:p-0">
+                  <div className="w-full max-w-lg mx-auto flex items-center justify-center">
+                    <picture className="w-full block">
+                      <source
+                        media="(max-width: 1023px)"
+                        srcSet={hero.imageMobile || hero.imageDesktop}
+                      />
+                      <source
+                        media="(min-width: 1024px)"
+                        srcSet={hero.imageDesktop || hero.imageMobile}
+                      />
+                      <img
+                        src={isMobile ? hero.imageMobile : hero.imageDesktop}
+                        alt={hero.title?.trim() || "Hero Banner"}
+                        className="w-full h-auto max-h-[36vh] sm:max-h-[40vh] object-contain block drop-shadow-2xl rounded-xl sm:rounded-2xl border border-white/20 lg:border-none lg:shadow-none lg:rounded-none lg:max-h-none lg:absolute lg:inset-0 lg:z-10 lg:w-full lg:h-full lg:object-cover"
+                      />
+                    </picture>
+                  </div>
+                </div>
+
+                {/* Desktop overlay text */}
                 <div className="hidden lg:block mx-4 lg:mx-auto max-w-5xl w-full z-20">
                   <div className="max-w-lg ml-4 lg:ml-0 mr-16 lg:mr-0 space-y-8">
                     {hero.title?.trim() && (
